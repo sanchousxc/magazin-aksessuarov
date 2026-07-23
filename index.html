@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VS — Магазин аксессуаров</title>
+<style>
+  :root{
+    --sky-deep:#0a1a2a;
+    --ink:#0c1116;
+    --paper:#f7f8f6;
+    --line: rgba(255,255,255,0.22);
+    --line-dark: rgba(10,20,30,0.12);
+    --accent:#c8ff4d;
+    --muted: rgba(255,255,255,0.62);
+    --muted-dark: rgba(12,17,22,0.6);
+    --radius: 2px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  a{color:inherit; text-decoration:none;}
+  button{font-family:inherit;}
+
+  /* ---------- HERO / SHADER BG ---------- */
+  .hero{
+    position:relative;
+    height:100vh;
+    min-height:640px;
+    overflow:hidden;
+    color:#fff;
+  }
+  .hero canvas{
+    position:absolute; inset:0; width:100%; height:100%; display:block;
+  }
+  .hero::after{
+    content:"";
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(6,12,20,0.35) 0%, rgba(6,12,20,0.05) 30%, rgba(6,12,20,0.55) 100%);
+    pointer-events:none;
+  }
+
+  .nav{
+    position:absolute; top:0; left:0; right:0;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 40px 56px;
+    min-height:100px;
+    z-index:5;
+  }
+  .logo{
+    display:flex; align-items:center; gap:14px;
+    font-weight:700; font-size:20px; letter-spacing:1px;
+  }
+  .logo-mark{
+    width:34px; height:34px;
+    border:1.5px solid rgba(255,255,255,0.75);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; font-weight:800;
+  }
+  .nav-links{
+    position:absolute; left:50%; top:50%;
+    transform:translate(-50%, -50%);
+    display:flex; align-items:center; gap:36px;
+    font-size:15.5px; letter-spacing:0.4px; color:var(--muted);
+  }
+  .nav-links a{
+    transition: color .2s ease, opacity .2s ease;
+    padding:4px 0;
+  }
+  .nav-links a:hover{ color:#fff; }
+  .btn-buy{
+    display:flex; align-items:center; gap:10px;
+    border:1px solid rgba(255,255,255,0.55);
+    border-radius:999px;
+    padding:9px 26px 9px 9px;
+    font-size:16.5px; font-weight:600; color:#fff;
+    line-height:1;
+    transition: background .25s ease, border-color .25s ease, transform .2s ease;
+  }
+  .btn-buy .circle{
+    flex:0 0 auto;
+    width:36px; height:36px; border-radius:50%;
+    border:1px solid rgba(255,255,255,0.7);
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; line-height:1;
+  }
+  .btn-buy:hover{ background:rgba(255,255,255,0.12); border-color:#fff; transform:translateY(-1px); }
+
+  .hero-content{
+    position:relative; z-index:4;
+    height:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center;
+    padding:0 24px;
+  }
+  .hero-title{
+    font-size:clamp(42px, 7vw, 106px);
+    font-weight:800;
+    letter-spacing:1px;
+    margin:0 0 22px 0;
+    text-shadow: 0 4px 30px rgba(0,0,0,0.35);
+  }
+  .hero-sub{
+    max-width:594px;
+    font-size:17.5px;
+    line-height:1.6;
+    color:rgba(255,255,255,0.82);
+    margin:0 0 34px 0;
+  }
+  .hero-cta{
+    display:inline-flex; align-items:center; gap:12px;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.6);
+    border-radius:999px;
+    padding:9px 29px 9px 9px;
+    font-size:16.5px; font-weight:600; color:#fff;
+    line-height:1;
+    backdrop-filter: blur(6px);
+    transition: background .25s ease, transform .2s ease;
+  }
+  .hero-cta .circle{
+    flex:0 0 auto;
+    width:35px; height:35px; border-radius:50%;
+    border:1px solid rgba(255,255,255,0.8);
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; line-height:1;
+  }
+  .hero-cta:hover{ background:rgba(255,255,255,0.18); transform:translateY(-2px); }
+
+  .scroll-hint{
+    position:absolute; bottom:28px; left:50%; transform:translateX(-50%);
+    z-index:4; color:var(--muted); font-size:12px; letter-spacing:2px;
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+  }
+  .scroll-hint .line{ width:1px; height:30px; background:rgba(255,255,255,0.5); animation:scrollpulse 1.8s ease-in-out infinite; }
+  @keyframes scrollpulse{ 0%,100%{opacity:.3;} 50%{opacity:1;} }
+
+  /* ---------- CATALOG ---------- */
+  .section{ padding:110px 151px; }
+  .section-head{
+    display:flex; align-items:flex-end; justify-content:space-between;
+    flex-wrap:wrap; gap:24px;
+    margin-bottom:48px;
+    border-bottom:1px solid var(--line-dark);
+    padding-bottom:24px;
+  }
+  .eyebrow{
+    font-size:12px; letter-spacing:3px; text-transform:uppercase;
+    color:var(--muted-dark); margin-bottom:10px; display:block;
+  }
+  .section-title{ font-size: clamp(28px, 3.4vw, 42px); font-weight:800; margin:0; letter-spacing:0.5px;}
+
+  .filters{ display:flex; gap:10px; flex-wrap:wrap; }
+  .filter-btn{
+    background:transparent;
+    border:1px solid var(--line-dark);
+    border-radius:999px;
+    padding:9px 20px;
+    font-size:13px; letter-spacing:0.4px;
+    color:var(--muted-dark);
+    cursor:pointer;
+    transition: all .2s ease;
+  }
+  .filter-btn:hover{ border-color:var(--ink); color:var(--ink); }
+  .filter-btn.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:28px;
+  }
+  .card{
+    border:1px solid var(--line-dark);
+    background:#fff;
+    display:flex; flex-direction:column;
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .card:hover{ transform:translateY(-4px); box-shadow: 0 18px 40px rgba(10,20,30,0.08); }
+  .card-media{
+    aspect-ratio: 4/3;
+    background:
+      repeating-linear-gradient(135deg, #eef0ec 0 12px, #e6e8e2 12px 24px);
+    background-size: cover;
+    background-position: center;
+    display:flex; align-items:center; justify-content:center;
+    color:#9aa199; font-size:12px; letter-spacing:1.5px; text-transform:uppercase;
+    border-bottom:1px solid var(--line-dark);
+  }
+  .card-body{ padding:20px; display:flex; flex-direction:column; gap:8px; flex:1; }
+  .card-tag{ font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted-dark); }
+  .card-title{ font-size:17px; font-weight:700; margin:0; }
+  .card-desc{ font-size:13.5px; color:var(--muted-dark); line-height:1.5; margin:0 0 10px 0; flex:1; }
+  .card-buy{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    border:1px solid var(--ink);
+    padding:11px; font-size:13px; letter-spacing:0.4px;
+    background:var(--ink); color:#fff;
+    transition: background .2s ease, color .2s ease;
+  }
+  .card-buy:hover{ background:#fff; color:var(--ink); }
+  .card{ cursor:pointer; }
+
+  /* ---------- PRODUCT MODAL ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; z-index:1000;
+    background:rgba(10,20,30,0.55);
+    display:none; align-items:center; justify-content:center;
+    padding:24px;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal-card{
+    background:#fff; width:100%; max-width:1100px; max-height:92vh;
+    border-radius:6px; overflow:auto; position:relative;
+    display:grid; grid-template-columns: 1.3fr 1fr;
+  }
+  @media (max-width:720px){ .modal-card{ grid-template-columns: 1fr; } }
+  .modal-close{
+    position:absolute; top:14px; right:14px; z-index:2;
+    width:36px; height:36px; border-radius:50%; border:none;
+    background:rgba(10,20,30,0.06); font-size:18px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition: background .2s ease;
+  }
+  .modal-close:hover{ background:rgba(10,20,30,0.14); }
+  .modal-gallery{ background:#fff; display:flex; flex-direction:column; }
+  .modal-gallery-main{
+    flex:1; min-height:480px; background-size:contain; background-repeat:no-repeat; background-position:center;
+    background-color:#f2f3f1;
+  }
+  .modal-thumbs{ display:flex; gap:8px; padding:12px; flex-wrap:wrap; }
+  .modal-thumb{
+    width:56px; height:56px; border-radius:4px; background-size:cover; background-position:center;
+    cursor:pointer; border:2px solid transparent; opacity:.7;
+  }
+  .modal-thumb.active{ border-color: var(--ink); opacity:1; }
+  .modal-info{ padding:32px; display:flex; flex-direction:column; gap:14px; }
+  .modal-tag{ font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted-dark); }
+  .modal-title{ font-size:24px; font-weight:700; margin:0; }
+  .modal-desc{ font-size:14.5px; line-height:1.7; color:var(--muted-dark); margin:0; }
+  .modal-buy{
+    margin-top:auto;
+    display:inline-flex; align-items:center; justify-content:center;
+    border:1px solid var(--ink); border-radius:999px;
+    padding:14px 20px; font-size:15px; font-weight:600; color:var(--ink);
+    transition: background .2s ease, color .2s ease;
+  }
+  .modal-buy:hover{ background:var(--ink); color:#fff; }
+
+  /* ---------- ABOUT / CONTACT ---------- */
+  .about{
+    position:relative;
+    background:var(--sky-deep);
+    color:#fff;
+    padding:120px 151px 60px;
+    overflow:hidden;
+  }
+  .about canvas{
+    position:absolute; inset:0; width:100%; height:100%; display:block; z-index:0;
+  }
+  .about::after{
+    content:"";
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(6,12,20,0.45) 0%, rgba(6,12,20,0.15) 30%, rgba(6,12,20,0.35) 100%);
+    pointer-events:none;
+    z-index:1;
+  }
+  .about-head, .about-body, .about-footer, .legal{
+    position:relative; z-index:2;
+  }
+  .about-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    border-bottom:1px solid var(--line);
+    padding-bottom:26px; margin-bottom:40px;
+    flex-wrap:wrap; gap:16px;
+  }
+  .about-head .eyebrow{ font-size:13px; }
+  .about-head .section-title{ color:#fff; font-size:clamp(31px, 3.7vw, 46px); }
+  .about-head .how{ font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); }
+  .about-body{
+    max-width:none;
+    padding:0;
+    font-size:17px; line-height:1.8;
+    color:rgba(255,255,255,0.88);
+  }
+  .about-body p{ margin:0 0 14px 0; }
+  .about-body p:last-child{ margin-bottom:0; }
+
+  .about-footer{
+    margin-top:130px;
+    display:flex; align-items:flex-start; justify-content:space-between;
+    flex-wrap:wrap; gap:40px;
+  }
+  .about-cta{
+    font-size:clamp(31px, 4.4vw, 53px);
+    font-weight:800; line-height:1.15; max-width:560px;
+  }
+  .contacts{ display:flex; flex-direction:column; gap:16px; }
+  .contact-link{
+    display:flex; align-items:center; gap:16px;
+    border:1px solid rgba(255,255,255,0.35);
+    border-radius:18px;
+    padding:22px 30px;
+    font-size:16.5px;
+    min-width:320px;
+    background:rgba(255,255,255,0.04);
+    transition: background .2s ease, transform .2s ease, border-color .2s ease;
+  }
+  .contact-link:hover{ background:rgba(255,255,255,0.1); transform:translateY(-2px); border-color:rgba(255,255,255,0.55); }
+  .contact-link .tg-icon{
+    width:46px; height:46px; border-radius:50%;
+    border:1px solid rgba(255,255,255,0.55);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .contact-link .tg-icon svg{ width:20px; height:20px; }
+  .contact-link .lines{ display:flex; flex-direction:column; gap:3px; }
+  .contact-link .lines .l1{ color:rgba(255,255,255,0.6); font-size:12.5px; letter-spacing:0.5px; }
+  .contact-link .lines .l2{ color:#fff; font-weight:600; font-size:16px; }
+
+  .legal{
+    margin-top:60px; padding-top:24px; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+    font-size:12px; color:var(--muted); letter-spacing:0.4px;
+  }
+
+  @media (max-width: 980px){
+    .grid{ grid-template-columns:repeat(2, 1fr); }
+  }
+  @media (max-width: 720px){
+    .nav{ padding:20px; }
+    .nav-links{ display:none; }
+    .section{ padding:70px 20px; }
+    .about{ padding:80px 20px 40px; }
+    .grid{ grid-template-columns:1fr; }
+    .about-footer{ margin-top:80px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <canvas id="cloudsCanvas"></canvas>
+
+  <nav class="nav">
+    <div class="logo">
+      <span class="logo-mark">VS</span>
+    </div>
+    <div class="nav-links">
+      <a href="#catalog">Каталог</a>
+      <a href="#about">О нас</a>
+      <a href="#about">Контакты</a>
+    </div>
+    <a class="btn-buy" href="https://t.me/magazil_aksessuarovbot" target="_blank" rel="noopener">
+      <span class="circle"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12h13M12 7l5 5-5 5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Купить
+    </a>
+  </nav>
+
+  <div class="hero-content">
+    <h1 class="hero-title">MAGAZIN AKSESSUAROV</h1>
+    <p class="hero-sub">Подборка аксессуаров для повседневной жизни.<br>Заказ и оплата — прямо в Telegram.</p>
+    <a class="hero-cta" href="#catalog">
+      <span class="circle"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4v13M7 12l5 5 5-5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Каталог
+    </a>
+  </div>
+
+  <div class="scroll-hint"><div class="line"></div></div>
+</header>
+
+<!-- ============ CATALOG ============ -->
+<section class="section" id="catalog">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Каталог</span>
+      <h2 class="section-title">Товары</h2>
+    </div>
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-filter="all">Все</button>
+      <button class="filter-btn" data-filter="headphones">Наушники</button>
+      <button class="filter-btn" data-filter="powerbank">Повербанки</button>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-card">
+      <button class="modal-close" id="modalClose">&times;</button>
+      <div class="modal-gallery">
+        <div class="modal-gallery-main" id="modalMainImg"></div>
+        <div class="modal-thumbs" id="modalThumbs"></div>
+      </div>
+      <div class="modal-info">
+        <span class="modal-tag" id="modalTag"></span>
+        <h3 class="modal-title" id="modalTitle"></h3>
+        <p class="modal-desc" id="modalDesc"></p>
+        <a class="modal-buy" id="modalBuy" target="_blank" rel="noopener">Купить в боте</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT / CONTACT ============ -->
+<section class="about" id="about">
+  <canvas id="cloudsCanvas2"></canvas>
+  <div class="about-head">
+    <div>
+      <span class="eyebrow" style="color:var(--muted);">О магазине</span>
+      <h2 class="section-title">О нас</h2>
+    </div>
+  </div>
+
+  <div class="about-body">
+    <p>Мы продаём оригинальные наушники Apple AirPods и повербанки Xiaomi. Каждый заказ оформляется напрямую в Telegram-боте — без лишних форм и ожидания.</p>
+    <p>Выбираете товар в каталоге, пишете в бота, уточняете детали и получаете заказ удобным способом.</p>
+  </div>
+
+  <div class="about-footer">
+    <div class="about-cta">Готовы оформить заказ?<br>Пишите в Telegram.</div>
+    <div class="contacts">
+      <a class="contact-link" href="https://t.me/magazil_aksessuarovbot" target="_blank" rel="noopener">
+        <span class="tg-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.5 3.5L2.5 11.1c-1.2.5-1.2 1.2-.2 1.5l4.9 1.5 1.9 5.8c.2.6.4.8.9.8.5 0 .7-.2 1-.5l2.4-2.3 4.9 3.6c.9.5 1.5.2 1.8-.9l3.2-15.1c.4-1.4-.4-2-1.4-1.5z" stroke="#fff" stroke-width="1.3" stroke-linejoin="round" fill="none"/></svg></span>
+        <span class="lines">
+          <span class="l1">Telegram-бот заказов</span>
+          <span class="l2">@magazil_aksessuarovbot</span>
+        </span>
+      </a>
+      <a class="contact-link" href="https://t.me/magazaks" target="_blank" rel="noopener">
+        <span class="tg-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.5 3.5L2.5 11.1c-1.2.5-1.2 1.2-.2 1.5l4.9 1.5 1.9 5.8c.2.6.4.8.9.8.5 0 .7-.2 1-.5l2.4-2.3 4.9 3.6c.9.5 1.5.2 1.8-.9l3.2-15.1c.4-1.4-.4-2-1.4-1.5z" stroke="#fff" stroke-width="1.3" stroke-linejoin="round" fill="none"/></svg></span>
+        <span class="lines">
+          <span class="l1">Telegram-канал</span>
+          <span class="l2">t.me/magazaks</span>
+        </span>
+      </a>
+    </div>
+  </div>
+
+  <div class="legal">
+    <span>© Magazin Aksessuarov</span>
+    <span>Аксессуары</span>
+  </div>
+</section>
+
+<script>
+/* =====================================================
+   CLOUDS SHADER BACKGROUND (Three.js, adapted)
+===================================================== */
+(function(){
+  function loadThree(cb){
+    const s = document.createElement('script');
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+
+  function initClouds(canvasId, containerId){
+    const canvas = document.getElementById(canvasId);
+    const container = document.getElementById(containerId);
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+    function size(){
+      const w = container.clientWidth, h = container.clientHeight;
+      renderer.setSize(w, h, false);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      if(material) material.uniforms.u_resolution.value.set(w, h);
+    }
+
+    const fragmentShader = `
+      precision highp float;
+      uniform float u_time;
+      uniform vec2 u_resolution;
+      varying vec2 vUv;
+
+      float hash(vec2 p) {
+        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+      }
+
+      float noise(vec2 p) {
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        f = f * f * (3.0 - 2.0 * f);
+        float a = hash(i);
+        float b = hash(i + vec2(1.0, 0.0));
+        float c = hash(i + vec2(0.0, 1.0));
+        float d = hash(i + vec2(1.0, 1.0));
+        return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+      }
+
+      float fbm(vec2 p) {
+        float value = 0.0;
+        float amplitude = 0.5;
+        for (int i = 0; i < 6; i++) {
+          value += amplitude * noise(p);
+          p *= 2.0;
+          amplitude *= 0.5;
+        }
+        return value;
+      }
+
+      void main() {
+        vec2 uv = vUv;
+        vec2 p = uv * vec2(3.0, 2.0);
+        p.x += u_time * 0.03;
+
+        float clouds = fbm(p);
+        clouds += 0.5 * fbm(p * 2.0 - vec2(u_time * 0.02, 0.0));
+        clouds = clamp(clouds - 0.4, 0.0, 1.0);
+
+        vec3 skyTop = vec3(0.04, 0.12, 0.24);
+        vec3 skyBottom = vec3(0.35, 0.62, 0.78);
+        vec3 sky = mix(skyBottom, skyTop, uv.y);
+
+        vec3 cloudColor = vec3(0.95, 0.97, 1.0);
+
+        float mask = smoothstep(0.2, 0.7, clouds);
+        vec3 color = mix(sky, cloudColor, mask * (1.0 - uv.y * 0.3));
+
+        gl_FragColor = vec4(color, 1.0);
+      }
+    `;
+
+    const vertexShader = `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = vec4(position, 1.0);
+      }
+    `;
+
+    var material = new THREE.ShaderMaterial({
+      uniforms: {
+        u_time: { value: 0 },
+        u_resolution: { value: new THREE.Vector2(container.clientWidth, container.clientHeight) }
+      },
+      vertexShader,
+      fragmentShader
+    });
+
+    const geometry = new THREE.PlaneGeometry(2, 2);
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+
+    size();
+
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      material.uniforms.u_time.value = clock.getElapsedTime();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', size);
+  }
+
+  loadThree(function(){
+    initClouds('cloudsCanvas', 'top');
+    initClouds('cloudsCanvas2', 'about');
+  });
+})();
+
+/* =====================================================
+   CATALOG DATA + FILTER
+===================================================== */
+const products = [
+  { name: "AirPods 3", cat: "headphones", tag: "Наушники", desc: "Компактные беспроводные наушники с пространственным звуком.", fullDesc: "Компактные беспроводные наушники с пространственным звуком. Адаптивный эквалайзер подстраивает звук под форму уха, а кейс поддерживает быструю зарядку. Время работы — до 6 часов от одного заряда и до 30 часов с кейсом.", img: "images/airpods3-1.jpg", gallery: ["images/airpods3-1.jpg", "images/airpods3-2.jpg", "images/airpods3-3.jpg"] },
+  { name: "AirPods 4", cat: "headphones", tag: "Наушники", desc: "Новое поколение AirPods с улучшенным качеством звука.", fullDesc: "Новое поколение AirPods с улучшенным качеством звука и обновлённым дизайном амбушюр. Поддержка пространственного аудио с динамическим отслеживанием головы и улучшенный микрофон для звонков.", img: "images/airpods4-1.jpg", gallery: ["images/airpods4-1.jpg", "images/airpods4-2.jpg", "images/airpods4-3.jpg"] },
+  { name: "AirPods Pro 2", cat: "headphones", tag: "Наушники", desc: "Активное шумоподавление и адаптивный звук.", fullDesc: "Активное шумоподавление нового поколения и режим прозрачности с адаптивным звуком. В комплекте несколько размеров силиконовых насадок для идеальной посадки. Влагозащита кейса и наушников.", img: "images/airpodspro2-1.jpg", gallery: ["images/airpodspro2-1.jpg", "images/airpodspro2-2.jpg", "images/airpodspro2-3.jpg"] },
+  { name: "AirPods Pro 3", cat: "headphones", tag: "Наушники", desc: "Флагманская модель с максимальным шумоподавлением.", fullDesc: "Флагманская модель линейки с максимальным уровнем шумоподавления и улучшенным качеством басов. Датчики в наушниках отслеживают правильность посадки и подстраивают звук в реальном времени.", img: "images/airpodspro3-1.jpg", gallery: ["images/airpodspro3-1.jpg", "images/airpodspro3-2.jpg", "images/airpodspro3-3.jpg"] },
+  { name: "Xiaomi Powerbank 10000 mAh", cat: "powerbank", tag: "Повербанк", desc: "Компактный повербанк для ежедневной зарядки на ходу.", fullDesc: "Компактный повербанк ёмкостью 10000 мАч для ежедневной зарядки на ходу. Поддержка быстрой зарядки по двум портам одновременно, компактный корпус помещается в карман.", img: "images/XiaomiPowerbank10-1.jpg", gallery: ["images/XiaomiPowerbank10-1.jpg", "images/XiaomiPowerbank10-2.jpg", "images/XiaomiPowerbank10-3.jpg"] },
+  { name: "Xiaomi Powerbank 20000 mAh", cat: "powerbank", tag: "Повербанк", desc: "Повышенная ёмкость для нескольких полных зарядок.", fullDesc: "Повышенная ёмкость 20000 мАч хватит на несколько полных зарядок смартфона. Три порта вывода позволяют заряжать сразу несколько устройств, а LED-индикатор показывает уровень заряда.", img: "images/XiaomiPowerbank20-1.jpg", gallery: ["images/XiaomiPowerbank20-1.jpg", "images/XiaomiPowerbank20-2.jpg", "images/XiaomiPowerbank20-3.jpg"] },
+];
+
+const grid = document.getElementById('grid');
+const BOT_LINK = "https://t.me/magazil_aksessuarovbot";
+
+function render(filter){
+  grid.innerHTML = "";
+  products
+    .filter(p => filter === "all" || p.cat === filter)
+    .forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const media = p.img
+        ? `<div class="card-media" style="background-image:url('${p.img}')"></div>`
+        : `<div class="card-media">Фото товара</div>`;
+      card.innerHTML = `
+        ${media}
+        <div class="card-body">
+          <span class="card-tag">${p.tag}</span>
+          <h3 class="card-title">${p.name}</h3>
+          <p class="card-desc">${p.desc}</p>
+          <a class="card-buy" href="${BOT_LINK}" target="_blank" rel="noopener">Купить в боте</a>
+        </div>
+      `;
+      card.addEventListener('click', (e) => {
+        if(e.target.closest('.card-buy')) return; // клик по кнопке — не открываем модалку
+        openModal(p);
+      });
+      grid.appendChild(card);
+    });
+}
+render("all");
+
+document.getElementById('filters').addEventListener('click', (e) => {
+  const btn = e.target.closest('.filter-btn');
+  if(!btn) return;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render(btn.dataset.filter);
+});
+
+/* =====================================================
+   PRODUCT MODAL
+===================================================== */
+const modalOverlay = document.getElementById('modalOverlay');
+const modalMainImg = document.getElementById('modalMainImg');
+const modalThumbs  = document.getElementById('modalThumbs');
+const modalTag     = document.getElementById('modalTag');
+const modalTitle   = document.getElementById('modalTitle');
+const modalDesc    = document.getElementById('modalDesc');
+const modalBuy     = document.getElementById('modalBuy');
+
+function setMainImage(src){
+  modalMainImg.style.backgroundImage = src ? `url('${src}')` : 'none';
+  document.querySelectorAll('.modal-thumb').forEach(t => {
+    t.classList.toggle('active', t.dataset.src === src);
+  });
+}
+
+function openModal(p){
+  const gallery = (p.gallery && p.gallery.length) ? p.gallery : (p.img ? [p.img] : []);
+  modalTag.textContent = p.tag;
+  modalTitle.textContent = p.name;
+  modalDesc.textContent = p.fullDesc || p.desc;
+  modalBuy.href = BOT_LINK;
+
+  modalThumbs.innerHTML = gallery.map(src =>
+    `<div class="modal-thumb" style="background-image:url('${src}')" data-src="${src}"></div>`
+  ).join('');
+  setMainImage(gallery[0]);
+
+  modalThumbs.querySelectorAll('.modal-thumb').forEach(t => {
+    t.addEventListener('click', () => setMainImage(t.dataset.src));
+  });
+
+  const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+  modalOverlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if(scrollbarWidth > 0){ document.body.style.paddingRight = scrollbarWidth + 'px'; }
+}
+
+function closeModal(){
+  modalOverlay.classList.remove('open');
+  document.body.style.overflow = '';
+  document.body.style.paddingRight = '';
+}
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+modalOverlay.addEventListener('click', (e) => {
+  if(e.target === modalOverlay) closeModal();
+});
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>
