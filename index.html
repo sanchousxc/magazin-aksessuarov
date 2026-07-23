@@ -594,8 +594,8 @@
    CATALOG DATA + FILTER
 ===================================================== */
 const products = [
-  { name: "AirPods 3", cat: "headphones", tag: "Наушники", desc: "Компактные беспроводные наушники с пространственным звуком.", fullDesc: "Premium Поддержка беспроводной зарядки, чип J8 Отображаются в основны, пробиваются, 3iтеi+гравировки, картон+молочная коробка, анимация на ios 26, все изображения в настройках как на AIR 3, звук микрофона. Чип с маркировкой 1562a airoha.", img: "images/airpods3-1.jpg", gallery: ["images/airpods3-1.jpg", "images/airpods3-2.jpg", "images/airpods3-3.jpg"] },
-  { name: "AirPods 4", cat: "headphones", tag: "Наушники", desc: "Новое поколение AirPods с улучшенным качеством звука.", fullDesc: "Чип J8 активное шумоподавление, улучшенная версия. Анимация, коробка и комплектация как в оригинале.", img: "images/airpods4-1.jpg", gallery: ["images/airpods4-1.jpg", "images/airpods4-2.jpg", "images/airpods4-3.jpg"] },
+  { name: "AirPods 3", cat: "headphones", tag: "Наушники", desc: "Компактные беспроводные наушники с пространственным звуком.", fullDesc: "Premium Поддержка беспроводной зарядки, чип J8 Отображаются в основны, пробиваются, 3iтеi+гравировки, картон+молочная коробка, анимация на ios 26, все изображения в настройках как на AIR 3, звук микрофона. чип с маркировкой 1562a airoha.", img: "images/airpods3-1.jpg", gallery: ["images/airpods3-1.jpg", "images/airpods3-2.jpg", "images/airpods3-3.jpg"] },
+  { name: "AirPods 4", cat: "headphones", tag: "Наушники", desc: "Новое поколение AirPods с улучшенным качеством звука.", fullDesc: "чип J8 активное шумоподавление, улучшенная версия. Анимация, коробка и комплектация как в оригинале.", img: "images/airpods4-1.jpg", gallery: ["images/airpods4-1.jpg", "images/airpods4-2.jpg", "images/airpods4-3.jpg"] },
   { name: "AirPods Pro 2", cat: "headphones", tag: "Наушники", desc: "Активное шумоподавление и адаптивный звук.", fullDesc: "Type-C airoha 1563 Е. Поддержка беспроводной зарядки, Звук как на оригинале, самый качественный микрофон среди копий, гироскоп, пространственный звук, Функции сенсоров как на ориге 1 в 1, 350ма аккумулятор до 7 часов работы, максимальное качество пластика кейса, все гравировки.", img: "images/airpodspro2-1.jpg", gallery: ["images/airpodspro2-1.jpg", "images/airpodspro2-2.jpg", "images/airpodspro2-3.jpg"] },
   { name: "AirPods Pro 3", cat: "headphones", tag: "Наушники", desc: "Флагманская модель с максимальным шумоподавлением.", fullDesc: "J8 Type-C c шумоподавлением. Флагманская модель линейки с максимальным уровнем шумоподавления и улучшенным качеством басов.", img: "images/airpodspro3-1.jpg", gallery: ["images/airpodspro3-1.jpg", "images/airpodspro3-2.jpg", "images/airpodspro3-3.jpg"] },
   { name: "Xiaomi Powerbank 10000 mAh", cat: "powerbank", tag: "Повербанк", desc: "Компактный повербанк для ежедневной зарядки на ходу.", fullDesc: "Компактный повербанк ёмкостью 10000 мАч для ежедневной зарядки на ходу. Поддержка быстрой зарядки по двум портам одновременно, компактный корпус помещается в карман.", img: "images/XiaomiPowerbank10-1.jpg", gallery: ["images/XiaomiPowerbank10-1.jpg", "images/XiaomiPowerbank10-2.jpg", "images/XiaomiPowerbank10-3.jpg"] },
@@ -621,7 +621,7 @@ function render(filter){
           <span class="card-tag">${p.tag}</span>
           <h3 class="card-title">${p.name}</h3>
           <p class="card-desc">${p.desc}</p>
-          <a class="card-buy" href="${BOT_LINK}" target="_blank" rel="noopener">Купить в боте</a>
+          <a class="card-buy" href="${BOT_LINK}" target="_blank" rel="noopener">Купить</a>
         </div>
       `;
       card.addEventListener('click', (e) => {
