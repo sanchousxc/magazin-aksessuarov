@@ -17,12 +17,14 @@
     --radius: 2px;
   }
   *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
+  html{scroll-behavior:smooth; overflow-x:hidden;}
   body{
     margin:0;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background:var(--paper);
     color:var(--ink);
+    overflow-x:hidden;
+    width:100%;
   }
   a{color:inherit; text-decoration:none;}
   button{font-family:inherit;}
@@ -216,10 +218,26 @@
   .modal-overlay.open{ display:flex; }
   .modal-card{
     background:#fff; width:100%; max-width:1100px; max-height:92vh;
-    border-radius:6px; overflow:auto; position:relative;
+    border-radius:6px; overflow-y:auto; overflow-x:hidden; position:relative;
     display:grid; grid-template-columns: 1.3fr 1fr;
+    min-width:0;
   }
-  @media (max-width:720px){ .modal-card{ grid-template-columns: 1fr; } }
+  @media (max-width:720px){
+    .modal-overlay{ padding:0; align-items:flex-end; }
+    .modal-card{
+      grid-template-columns: 1fr;
+      max-width:100%; width:100%; max-height:90vh;
+      border-radius:16px 16px 0 0;
+    }
+    .modal-gallery-main{ min-height:0; aspect-ratio:1/1; }
+    .modal-thumbs{ padding:10px 16px; }
+    .modal-thumb{ width:44px; height:44px; }
+    .modal-info{ padding:20px; gap:10px; align-items:center; text-align:center; }
+    .modal-title{ font-size:20px; }
+    .modal-desc{ font-size:13.5px; line-height:1.55; }
+    .modal-buy{ padding:12px 20px; width:100%; }
+    .modal-close{ top:10px; right:10px; width:32px; height:32px; font-size:16px; background:rgba(255,255,255,0.85); }
+  }
   .modal-close{
     position:absolute; top:14px; right:14px; z-index:2;
     width:36px; height:36px; border-radius:50%; border:none;
@@ -228,7 +246,7 @@
     transition: background .2s ease;
   }
   .modal-close:hover{ background:rgba(10,20,30,0.14); }
-  .modal-gallery{ background:#fff; display:flex; flex-direction:column; }
+  .modal-gallery{ background:#fff; display:flex; flex-direction:column; min-width:0; }
   .modal-gallery-main{
     flex:1; min-height:480px; background-size:contain; background-repeat:no-repeat; background-position:center;
     background-color:#f2f3f1;
@@ -239,10 +257,10 @@
     cursor:pointer; border:2px solid transparent; opacity:.7;
   }
   .modal-thumb.active{ border-color: var(--ink); opacity:1; }
-  .modal-info{ padding:32px; display:flex; flex-direction:column; gap:14px; }
+  .modal-info{ padding:32px; display:flex; flex-direction:column; gap:14px; min-width:0; }
   .modal-tag{ font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted-dark); }
-  .modal-title{ font-size:24px; font-weight:700; margin:0; }
-  .modal-desc{ font-size:14.5px; line-height:1.7; color:var(--muted-dark); margin:0; }
+  .modal-title{ font-size:24px; font-weight:700; margin:0; overflow-wrap:break-word; }
+  .modal-desc{ font-size:14.5px; line-height:1.7; color:var(--muted-dark); margin:0; overflow-wrap:break-word; }
   .modal-buy{
     margin-top:auto;
     display:inline-flex; align-items:center; justify-content:center;
@@ -506,7 +524,8 @@
 
       void main() {
         vec2 uv = vUv;
-        vec2 p = uv * vec2(3.0, 2.0);
+        float aspect = u_resolution.x / u_resolution.y;
+        vec2 p = vec2(uv.x * aspect, uv.y) * 1.7;
         p.x += u_time * 0.03;
 
         float clouds = fbm(p);
