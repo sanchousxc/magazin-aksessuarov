@@ -267,6 +267,13 @@
     transition: background .2s ease, color .2s ease;
   }
   .card-buy:hover{ background:#fff; color:var(--ink); }
+  .card-buy.disabled{ background:#ccc; border-color:#ccc; color:#777; cursor:not-allowed; pointer-events:none; }
+  .card-soldout{
+    position:absolute; top:12px; left:12px; z-index:2;
+    background:rgba(20,20,20,0.85); color:#fff;
+    font-size:11px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;
+    padding:6px 12px; border-radius:999px;
+  }
   .card{ cursor:pointer; }
 
   /* ---------- PRODUCT MODAL ---------- */
@@ -333,6 +340,8 @@
     transition: background .2s ease, color .2s ease;
   }
   .modal-buy:hover{ background:var(--ink); color:#fff; }
+  .modal-buy.disabled{ border-color:#ccc; color:#999; pointer-events:none; }
+  .modal-buy.disabled:hover{ background:none; color:#999; }
 
   /* ---------- ABOUT / CONTACT ---------- */
   .about{
@@ -423,6 +432,20 @@
     .about-footer{ margin-top:80px; }
   }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDIScsO6CCmX24n9neySyVsWMBgj3UdMww",
+    authDomain: "najgoat2me.firebaseapp.com",
+    projectId: "najgoat2me",
+    storageBucket: "najgoat2me.firebasestorage.app",
+    messagingSenderId: "1074014263027",
+    appId: "1:1074014263027:web:ac03d1ab80662508614986"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
 </head>
 <body>
 
@@ -483,11 +506,6 @@
     </div>
     <div class="filters" id="filters">
       <button class="filter-btn active" data-filter="all">Все</button>
-      <button class="filter-btn" data-filter="headphones">Наушники</button>
-      <button class="filter-btn" data-filter="powerbank">Повербанки</button>
-      <button class="filter-btn" data-filter="glasses">Очки</button>
-      <button class="filter-btn" data-filter="gamepad">Геймпады</button>
-      <button class="filter-btn" data-filter="watch">Часы</button>
     </div>
   </div>
 
@@ -729,25 +747,33 @@
 })();
 
 /* =====================================================
-   CATALOG DATA + FILTER
+   CATALOG DATA (Firestore) + FILTER
 ===================================================== */
-const products = [
-  { name: "AirPods 3", cat: "headphones", tag: "Наушники", price: "2000 ₽", desc: "Компактные беспроводные наушники с пространственным звуком.", fullDesc: "Premium Поддержка беспроводной зарядки, чип J8 Отображаются в основны, пробиваются, 3iтеi+гравировки, картон+молочная коробка, анимация на ios 26, все изображения в настройках как на AIR 3, звук микрофона. чип с маркировкой 1562a airoha.", img: "images/airpods3-1.jpg", gallery: ["images/airpods3-1.jpg", "images/airpods3-2.jpg", "images/airpods3-3.jpg"] },
-  { name: "AirPods 4", cat: "headphones", tag: "Наушники", price: "2200 ₽", desc: "Новое поколение AirPods с улучшенным качеством звука.", fullDesc: "чип J8 активное шумоподавление, улучшенная версия. Анимация, коробка и комплектация как в оригинале.", img: "images/airpods4-1.jpg", gallery: ["images/airpods4-1.jpg", "images/airpods4-2.jpg", "images/airpods4-3.jpg"] },
-  { name: "AirPods Pro 2", cat: "headphones", tag: "Наушники", price: "2500 ₽", desc: "Активное шумоподавление и адаптивный звук.", fullDesc: "Type-C airoha 1563 Е. Поддержка беспроводной зарядки, Звук как на оригинале, самый качественный микрофон среди копий, гироскоп, пространственный звук, Функции сенсоров как на ориге 1 в 1, 350ма аккумулятор до 7 часов работы, максимальное качество пластика кейса, все гравировки.", img: "images/airpodspro2-1.jpg", gallery: ["images/airpodspro2-1.jpg", "images/airpodspro2-2.jpg", "images/airpodspro2-3.jpg"] },
-  { name: "AirPods Pro 3", cat: "headphones", tag: "Наушники", price: "2800 ₽", desc: "Флагманская модель с максимальным шумоподавлением.", fullDesc: "J8 Type-C c шумоподавлением. Флагманская модель линейки с максимальным уровнем шумоподавления и улучшенным качеством басов.", img: "images/airpodspro3-1.jpg", gallery: ["images/airpodspro3-1.jpg", "images/airpodspro3-2.jpg", "images/airpodspro3-3.jpg"] },
-  { name: "Xiaomi Powerbank 10000 mAh", cat: "powerbank", tag: "Повербанк", price: "2000 ₽", desc: "Компактный повербанк для ежедневной зарядки на ходу.", fullDesc: "Компактный повербанк ёмкостью 10000 мАч для ежедневной зарядки на ходу. Поддержка быстрой зарядки по двум портам одновременно, компактный корпус помещается в карман.", img: "images/XiaomiPowerbank10-1.jpg", gallery: ["images/XiaomiPowerbank10-1.jpg", "images/XiaomiPowerbank10-2.jpg", "images/XiaomiPowerbank10-3.jpg"] },
-  { name: "Xiaomi Powerbank 20000 mAh", cat: "powerbank", tag: "Повербанк", price: "2500 ₽", desc: "Повышенная ёмкость для нескольких полных зарядок.", fullDesc: "Повышенная ёмкость 20000 мАч хватит на несколько полных зарядок смартфона. Три порта вывода позволяют заряжать сразу несколько устройств, а LED-индикатор показывает уровень заряда.", img: "images/XiaomiPowerbank20-1.jpg", gallery: ["images/XiaomiPowerbank20-1.jpg", "images/XiaomiPowerbank20-2.jpg", "images/XiaomiPowerbank20-3.jpg"] },
-  { name: "Ray-Ban Smart Glasses", cat: "glasses", tag: "Очки", price: "6000 ₽", desc: "Стильные умные очки со встроенной камерой и звуком в оправе.", fullDesc: "Топовое качество съемки, отличный микрофон, двое линз в комплекте.", img: "images/raybansmart-1.jpg", gallery: ["images/raybansmart-1.jpg"] },
-  { name: "PlayStation 5 DualSense", cat: "gamepad", tag: "Геймпад", price: "3500 ₽", desc: "Беспроводной геймпад с адаптивными триггерами и тактильной отдачей.", fullDesc: "Точная эргономика, адаптивные триггеры с переменным сопротивлением, встроенный динамик и поддержка беспроводной зарядки — полный набор ощущений для комфортной игры.", img: "images/ps5dualsense-1.jpg", gallery: ["images/ps5dualsense-1.jpg"] },
-  { name: "Apple Watch Series 11 46mm", cat: "watch", tag: "Часы", price: "3000 ₽", desc: "Смарт-часы с большим экраном и трекингом активности на каждый день.", fullDesc: "Apple Watch Series 11 46mm Jet AI S8. Крупный корпус, чёткий дисплей и стабильная работа датчиков — привычный опыт Apple Watch без переплаты за оригинал.", img: "images/watch11-1.png", gallery: ["images/watch11-1.png"] },
-];
+let products = [];
+let categories = []; // [{ key, label }]
+let currentFilter = "all";
 
 const grid = document.getElementById('grid');
+const filtersEl = document.getElementById('filters');
 const BOT_LINK = "https://t.me/magazil_aksessuarovbot";
 
+function renderFilters(){
+  const extra = categories.map(c =>
+    `<button class="filter-btn${currentFilter===c.key ? ' active':''}" data-filter="${c.key}">${c.label}</button>`
+  ).join('');
+  filtersEl.innerHTML = `<button class="filter-btn${currentFilter==='all' ? ' active':''}" data-filter="all">Все</button>${extra}`;
+}
+
 function render(filter){
+  currentFilter = filter;
+  renderFilters();
   grid.innerHTML = "";
+
+  if(!products.length){
+    grid.innerHTML = `<p style="color:var(--muted-dark); grid-column:1/-1;">Товары скоро появятся.</p>`;
+    return;
+  }
+
   products
     .filter(p => filter === "all" || p.cat === filter)
     .forEach(p => {
@@ -756,14 +782,18 @@ function render(filter){
       const media = p.img
         ? `<div class="card-media" style="background-image:url('${p.img}')"></div>`
         : `<div class="card-media">Фото товара</div>`;
+      const soldOut = p.available === false;
       card.innerHTML = `
-        ${media}
+        <div style="position:relative;">
+          ${media}
+          ${soldOut ? `<div class="card-soldout">Нет в наличии</div>` : ''}
+        </div>
         <div class="card-body">
           <span class="card-tag">${p.tag}</span>
           <h3 class="card-title">${p.name}</h3>
           <p class="card-desc">${p.desc}</p>
           <div class="card-price">${p.price}</div>
-          <a class="card-buy" href="${BOT_LINK}" target="_blank" rel="noopener">Купить</a>
+          <a class="card-buy${soldOut ? ' disabled':''}" href="${soldOut ? '#' : BOT_LINK}" target="${soldOut ? '_self' : '_blank'}" rel="noopener">${soldOut ? 'Нет в наличии' : 'Купить'}</a>
         </div>
       `;
       card.addEventListener('click', (e) => {
@@ -773,15 +803,23 @@ function render(filter){
       grid.appendChild(card);
     });
 }
-render("all");
 
-document.getElementById('filters').addEventListener('click', (e) => {
+filtersEl.addEventListener('click', (e) => {
   const btn = e.target.closest('.filter-btn');
   if(!btn) return;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
   render(btn.dataset.filter);
 });
+
+// ---- Подписка на изменения в реальном времени ----
+db.collection('categories').orderBy('order').onSnapshot(snap => {
+  categories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  render(currentFilter);
+}, err => console.error('Ошибка загрузки категорий:', err));
+
+db.collection('products').orderBy('order').onSnapshot(snap => {
+  products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  render(currentFilter);
+}, err => console.error('Ошибка загрузки товаров:', err));
 
 /* =====================================================
    PRODUCT MODAL
@@ -804,11 +842,14 @@ function setMainImage(src){
 
 function openModal(p){
   const gallery = (p.gallery && p.gallery.length) ? p.gallery : (p.img ? [p.img] : []);
+  const soldOut = p.available === false;
   modalTag.textContent = p.tag;
   modalTitle.textContent = p.name;
   modalPrice.textContent = p.price || '';
   modalDesc.textContent = p.fullDesc || p.desc;
-  modalBuy.href = BOT_LINK;
+  modalBuy.href = soldOut ? '#' : BOT_LINK;
+  modalBuy.textContent = soldOut ? 'Нет в наличии' : 'Купить в боте';
+  modalBuy.classList.toggle('disabled', soldOut);
 
   modalThumbs.innerHTML = gallery.map(src =>
     `<div class="modal-thumb" style="background-image:url('${src}')" data-src="${src}"></div>`
