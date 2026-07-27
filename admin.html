@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Админка — NAJG</title>
+<style>
+  :root{
+    --ink:#12181f;
+    --muted:#8a94a3;
+    --muted-dark:#5c6675;
+    --line:#e7e9ee;
+    --bg:#f5f6f8;
+    --accent:#2f6fed;
+    --danger:#e5484d;
+    --ok:#2fa84f;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; font-family: 'Segoe UI', Arial, sans-serif;
+    background:var(--bg); color:var(--ink);
+  }
+
+  /* ---------- LOGIN SCREEN ---------- */
+  .login-screen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding:24px;
+  }
+  .login-card{
+    width:100%; max-width:360px;
+    background:#fff; border:1px solid var(--line); border-radius:16px;
+    padding:36px 32px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.06);
+  }
+  .login-card h1{ font-size:22px; margin:0 0 6px 0; }
+  .login-card p{ font-size:13.5px; color:var(--muted-dark); margin:0 0 24px 0; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12.5px; color:var(--muted-dark); margin-bottom:6px; }
+  .field input, .field textarea, .field select{
+    width:100%; padding:11px 13px; border:1px solid var(--line); border-radius:10px;
+    font-size:14px; font-family:inherit; color:var(--ink);
+    background:#fafbfc;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus{
+    outline:none; border-color:var(--accent); background:#fff;
+  }
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:11px 20px; border-radius:10px; border:none; cursor:pointer;
+    font-size:14px; font-weight:600; font-family:inherit;
+    background:var(--ink); color:#fff;
+    transition: opacity .15s ease;
+  }
+  .btn:hover{ opacity:0.85; }
+  .btn.full{ width:100%; }
+  .btn.secondary{ background:#fff; color:var(--ink); border:1px solid var(--line); }
+  .btn.danger{ background:var(--danger); }
+  .btn.small{ padding:7px 14px; font-size:12.5px; }
+  .error-msg{ color:var(--danger); font-size:13px; margin-top:10px; min-height:16px; }
+
+  /* ---------- ADMIN LAYOUT ---------- */
+  .admin-app{ display:none; }
+  .admin-app.visible{ display:block; }
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px; background:#fff; border-bottom:1px solid var(--line);
+    position:sticky; top:0; z-index:10;
+  }
+  .topbar .brand{ font-weight:800; font-size:16px; letter-spacing:0.4px; }
+  .topbar .user-email{ font-size:13px; color:var(--muted-dark); margin-right:14px; }
+
+  .tabs{
+    display:flex; gap:6px; padding:18px 28px 0 28px;
+  }
+  .tab-btn{
+    padding:10px 18px; border-radius:10px 10px 0 0; border:1px solid var(--line); border-bottom:none;
+    background:#fff; color:var(--muted-dark); font-size:14px; font-weight:600; cursor:pointer;
+  }
+  .tab-btn.active{ background:var(--bg); color:var(--ink); }
+
+  .tab-panel{ display:none; padding:24px 28px 60px 28px; }
+  .tab-panel.active{ display:block; }
+
+  .panel-head{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:18px; flex-wrap:wrap; gap:12px;
+  }
+  .panel-head h2{ margin:0; font-size:19px; }
+
+  /* ---------- TABLE ---------- */
+  .table-wrap{
+    background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden;
+  }
+  table{ width:100%; border-collapse:collapse; font-size:13.5px; }
+  th, td{ padding:12px 14px; text-align:left; border-bottom:1px solid var(--line); vertical-align:middle; }
+  th{ background:#fafbfc; color:var(--muted-dark); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.3px; }
+  tr:last-child td{ border-bottom:none; }
+  td.actions{ white-space:nowrap; display:flex; gap:8px; }
+  .thumb{ width:44px; height:44px; border-radius:8px; background-size:cover; background-position:center; background-color:#f0f1f3; flex:0 0 auto; }
+  .badge{
+    display:inline-block; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:700;
+  }
+  .badge.ok{ background:rgba(47,168,79,0.12); color:var(--ok); }
+  .badge.no{ background:rgba(229,72,77,0.12); color:var(--danger); }
+  .toggle-switch{ cursor:pointer; }
+
+  /* ---------- MODAL FORM ---------- */
+  .modal-bg{
+    display:none; position:fixed; inset:0; background:rgba(10,15,20,0.5);
+    z-index:100; align-items:flex-start; justify-content:center; overflow-y:auto; padding:40px 20px;
+  }
+  .modal-bg.open{ display:flex; }
+  .modal-box{
+    background:#fff; border-radius:16px; width:100%; max-width:560px;
+    padding:28px; margin-bottom:40px;
+  }
+  .modal-box h3{ margin:0 0 18px 0; font-size:18px; }
+  .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .form-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+  .checkbox-row{ display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+  .checkbox-row input{ width:auto; }
+  .hint{ font-size:12px; color:var(--muted); margin-top:4px; }
+
+  .empty-state{ padding:40px; text-align:center; color:var(--muted-dark); font-size:14px; }
+  .seed-box{
+    background:#fff8e8; border:1px solid #f2dca0; border-radius:12px;
+    padding:16px 18px; margin-bottom:20px; font-size:13.5px; color:#7a5c00;
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <h1>Вход в админку</h1>
+    <p>NAJG — управление товарами и категориями</p>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Пароль</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn full" id="loginBtn">Войти</button>
+    <div class="error-msg" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ============ ADMIN APP ============ -->
+<div class="admin-app" id="adminApp">
+
+  <div class="topbar">
+    <div class="brand">NAJG · Админка</div>
+    <div style="display:flex; align-items:center;">
+      <span class="user-email" id="userEmail"></span>
+      <button class="btn secondary small" id="logoutBtn">Выйти</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="products">Товары</button>
+    <button class="tab-btn" data-tab="categories">Категории</button>
+  </div>
+
+  <!-- ---------- PRODUCTS TAB ---------- -->
+  <div class="tab-panel active" id="tab-products">
+
+    <div class="seed-box" id="seedBox" style="display:none;">
+      <span>Товаров в базе пока нет. Можно один раз загрузить начальный набор (9 товаров + 6 категорий) — дальше редактируйте как удобно.</span>
+      <button class="btn small" id="seedBtn">Загрузить начальные данные</button>
+    </div>
+
+    <div class="panel-head">
+      <h2>Товары</h2>
+      <button class="btn" id="addProductBtn">+ Добавить товар</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Название</th>
+            <th>Категория</th>
+            <th>Цена</th>
+            <th>Наличие</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="productsTableBody"></tbody>
+      </table>
+      <div class="empty-state" id="productsEmpty" style="display:none;">Пока нет ни одного товара</div>
+    </div>
+  </div>
+
+  <!-- ---------- CATEGORIES TAB ---------- -->
+  <div class="tab-panel" id="tab-categories">
+    <div class="panel-head">
+      <h2>Категории</h2>
+      <button class="btn" id="addCategoryBtn">+ Добавить категорию</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Ключ (cat)</th>
+            <th>Название кнопки</th>
+            <th>Порядок</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="categoriesTableBody"></tbody>
+      </table>
+      <div class="empty-state" id="categoriesEmpty" style="display:none;">Пока нет ни одной категории</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PRODUCT MODAL ============ -->
+<div class="modal-bg" id="productModalBg">
+  <div class="modal-box">
+    <h3 id="productModalTitle">Новый товар</h3>
+    <input type="hidden" id="productId">
+
+    <div class="field">
+      <label>Название товара</label>
+      <input type="text" id="pName" placeholder="AirPods 3">
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label>Категория</label>
+        <select id="pCat"></select>
+      </div>
+      <div class="field">
+        <label>Подпись на карточке (тег)</label>
+        <input type="text" id="pTag" placeholder="Наушники">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label>Цена</label>
+        <input type="text" id="pPrice" placeholder="2000 ₽">
+      </div>
+      <div class="field">
+        <label>Порядок сортировки</label>
+        <input type="number" id="pOrder" placeholder="1">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Короткое описание (на карточке)</label>
+      <textarea id="pDesc" rows="2" placeholder="Компактные беспроводные наушники..."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Полное описание (в окне товара)</label>
+      <textarea id="pFullDesc" rows="4" placeholder="Подробное описание для карточки товара..."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Ссылка на главное фото</label>
+      <input type="text" id="pImg" placeholder="images/airpods3-1.jpg">
+    </div>
+
+    <div class="field">
+      <label>Галерея (ссылки через запятую)</label>
+      <textarea id="pGallery" rows="2" placeholder="images/airpods3-1.jpg, images/airpods3-2.jpg"></textarea>
+      <div class="hint">Если оставить пустым — будет использовано только главное фото.</div>
+    </div>
+
+    <div class="checkbox-row">
+      <input type="checkbox" id="pAvailable" checked>
+      <label for="pAvailable" style="margin:0;">Товар в наличии</label>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn secondary" id="productCancelBtn">Отмена</button>
+      <button class="btn" id="productSaveBtn">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CATEGORY MODAL ============ -->
+<div class="modal-bg" id="categoryModalBg">
+  <div class="modal-box">
+    <h3 id="categoryModalTitle">Новая категория</h3>
+    <input type="hidden" id="categoryOldKey">
+
+    <div class="field">
+      <label>Ключ категории (латиницей, без пробелов)</label>
+      <input type="text" id="cKey" placeholder="headphones">
+      <div class="hint">Используется внутри системы, само не отображается на сайте.</div>
+    </div>
+    <div class="field">
+      <label>Название кнопки на сайте</label>
+      <input type="text" id="cLabel" placeholder="Наушники">
+    </div>
+    <div class="field">
+      <label>Порядок</label>
+      <input type="number" id="cOrder" placeholder="1">
+    </div>
+
+    <div class="form-actions">
+      <button class="btn secondary" id="categoryCancelBtn">Отмена</button>
+      <button class="btn" id="categorySaveBtn">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDIScsO6CCmX24n9neySyVsWMBgj3UdMww",
+  authDomain: "najgoat2me.firebaseapp.com",
+  projectId: "najgoat2me",
+  storageBucket: "najgoat2me.firebasestorage.app",
+  messagingSenderId: "1074014263027",
+  appId: "1:1074014263027:web:ac03d1ab80662508614986"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* =====================================================
+   AUTH
+===================================================== */
+const loginScreen = document.getElementById('loginScreen');
+const adminApp = document.getElementById('adminApp');
+const loginError = document.getElementById('loginError');
+
+document.getElementById('loginBtn').addEventListener('click', () => {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  loginError.textContent = '';
+  auth.signInWithEmailAndPassword(email, password)
+    .catch(err => { loginError.textContent = 'Неверный email или пароль.'; console.error(err); });
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+
+auth.onAuthStateChanged(user => {
+  if(user){
+    loginScreen.style.display = 'none';
+    adminApp.classList.add('visible');
+    document.getElementById('userEmail').textContent = user.email;
+    startListeners();
+  } else {
+    loginScreen.style.display = 'flex';
+    adminApp.classList.remove('visible');
+  }
+});
+
+/* =====================================================
+   TABS
+===================================================== */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* =====================================================
+   DATA LISTENERS
+===================================================== */
+let categories = [];
+let products = [];
+let listenersStarted = false;
+
+function startListeners(){
+  if(listenersStarted) return;
+  listenersStarted = true;
+
+  db.collection('categories').orderBy('order').onSnapshot(snap => {
+    categories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderCategoriesTable();
+    fillCategorySelect();
+  });
+
+  db.collection('products').orderBy('order').onSnapshot(snap => {
+    products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderProductsTable();
+    document.getElementById('seedBox').style.display = products.length === 0 ? 'flex' : 'none';
+  });
+}
+
+/* =====================================================
+   CATEGORIES: RENDER + CRUD
+===================================================== */
+function renderCategoriesTable(){
+  const body = document.getElementById('categoriesTableBody');
+  document.getElementById('categoriesEmpty').style.display = categories.length ? 'none' : 'block';
+  body.innerHTML = categories.map(c => `
+    <tr>
+      <td><code>${c.id}</code></td>
+      <td>${c.label}</td>
+      <td>${c.order ?? ''}</td>
+      <td class="actions">
+        <button class="btn secondary small" onclick="editCategory('${c.id}')">Изменить</button>
+        <button class="btn danger small" onclick="deleteCategory('${c.id}')">Удалить</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function fillCategorySelect(){
+  const sel = document.getElementById('pCat');
+  sel.innerHTML = categories.map(c => `<option value="${c.id}">${c.label}</option>`).join('');
+}
+
+const categoryModalBg = document.getElementById('categoryModalBg');
+document.getElementById('addCategoryBtn').addEventListener('click', () => openCategoryModal());
+document.getElementById('categoryCancelBtn').addEventListener('click', () => categoryModalBg.classList.remove('open'));
+
+function openCategoryModal(cat){
+  document.getElementById('categoryModalTitle').textContent = cat ? 'Изменить категорию' : 'Новая категория';
+  document.getElementById('categoryOldKey').value = cat ? cat.id : '';
+  document.getElementById('cKey').value = cat ? cat.id : '';
+  document.getElementById('cKey').disabled = !!cat;
+  document.getElementById('cLabel').value = cat ? cat.label : '';
+  document.getElementById('cOrder').value = cat ? (cat.order ?? '') : (categories.length + 1);
+  categoryModalBg.classList.add('open');
+}
+
+window.editCategory = function(id){
+  const cat = categories.find(c => c.id === id);
+  if(cat) openCategoryModal(cat);
+};
+
+window.deleteCategory = function(id){
+  if(!confirm('Удалить эту категорию? Товары этой категории останутся, но кнопка фильтра исчезнет с сайта.')) return;
+  db.collection('categories').doc(id).delete();
+};
+
+document.getElementById('categorySaveBtn').addEventListener('click', () => {
+  const oldKey = document.getElementById('categoryOldKey').value;
+  const key = document.getElementById('cKey').value.trim();
+  const label = document.getElementById('cLabel').value.trim();
+  const order = Number(document.getElementById('cOrder').value) || 0;
+
+  if(!key || !label){ alert('Заполните ключ и название.'); return; }
+
+  db.collection('categories').doc(key).set({ label, order })
+    .then(() => {
+      categoryModalBg.classList.remove('open');
+    })
+    .catch(err => alert('Ошибка сохранения: ' + err.message));
+});
+
+/* =====================================================
+   PRODUCTS: RENDER + CRUD
+===================================================== */
+function renderProductsTable(){
+  const body = document.getElementById('productsTableBody');
+  document.getElementById('productsEmpty').style.display = products.length ? 'none' : 'block';
+  body.innerHTML = products.map(p => {
+    const catLabel = (categories.find(c => c.id === p.cat) || {}).label || p.cat;
+    const available = p.available !== false;
+    return `
+      <tr>
+        <td>${p.img ? `<div class="thumb" style="background-image:url('${p.img}')"></div>` : `<div class="thumb"></div>`}</td>
+        <td>${p.name}</td>
+        <td>${catLabel}</td>
+        <td>${p.price || ''}</td>
+        <td>
+          <span class="badge toggle-switch ${available ? 'ok' : 'no'}" onclick="toggleAvailability('${p.id}', ${available})">
+            ${available ? 'В наличии' : 'Нет в наличии'}
+          </span>
+        </td>
+        <td class="actions">
+          <button class="btn secondary small" onclick="editProduct('${p.id}')">Изменить</button>
+          <button class="btn danger small" onclick="deleteProduct('${p.id}')">Удалить</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+window.toggleAvailability = function(id, currentlyAvailable){
+  db.collection('products').doc(id).update({ available: !currentlyAvailable });
+};
+
+const productModalBg = document.getElementById('productModalBg');
+document.getElementById('addProductBtn').addEventListener('click', () => openProductModal());
+document.getElementById('productCancelBtn').addEventListener('click', () => productModalBg.classList.remove('open'));
+
+function openProductModal(p){
+  document.getElementById('productModalTitle').textContent = p ? 'Изменить товар' : 'Новый товар';
+  document.getElementById('productId').value = p ? p.id : '';
+  document.getElementById('pName').value = p ? p.name : '';
+  fillCategorySelect();
+  document.getElementById('pCat').value = p ? p.cat : (categories[0] ? categories[0].id : '');
+  document.getElementById('pTag').value = p ? p.tag : '';
+  document.getElementById('pPrice').value = p ? p.price : '';
+  document.getElementById('pOrder').value = p ? (p.order ?? '') : (products.length + 1);
+  document.getElementById('pDesc').value = p ? p.desc : '';
+  document.getElementById('pFullDesc').value = p ? p.fullDesc : '';
+  document.getElementById('pImg').value = p ? p.img : '';
+  document.getElementById('pGallery').value = p && p.gallery ? p.gallery.join(', ') : '';
+  document.getElementById('pAvailable').checked = p ? p.available !== false : true;
+  productModalBg.classList.add('open');
+}
+
+window.editProduct = function(id){
+  const p = products.find(x => x.id === id);
+  if(p) openProductModal(p);
+};
+
+window.deleteProduct = function(id){
+  if(!confirm('Удалить этот товар навсегда?')) return;
+  db.collection('products').doc(id).delete();
+};
+
+document.getElementById('productSaveBtn').addEventListener('click', () => {
+  const id = document.getElementById('productId').value;
+  const galleryRaw = document.getElementById('pGallery').value.trim();
+  const gallery = galleryRaw ? galleryRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+  const data = {
+    name: document.getElementById('pName').value.trim(),
+    cat: document.getElementById('pCat').value,
+    tag: document.getElementById('pTag').value.trim(),
+    price: document.getElementById('pPrice').value.trim(),
+    order: Number(document.getElementById('pOrder').value) || 0,
+    desc: document.getElementById('pDesc').value.trim(),
+    fullDesc: document.getElementById('pFullDesc').value.trim(),
+    img: document.getElementById('pImg').value.trim(),
+    gallery: gallery.length ? gallery : (document.getElementById('pImg').value.trim() ? [document.getElementById('pImg').value.trim()] : []),
+    available: document.getElementById('pAvailable').checked,
+  };
+
+  if(!data.name){ alert('Введите название товара.'); return; }
+
+  const promise = id
+    ? db.collection('products').doc(id).update(data)
+    : db.collection('products').add(data);
+
+  promise
+    .then(() => productModalBg.classList.remove('open'))
+    .catch(err => alert('Ошибка сохранения: ' + err.message));
+});
+
+/* =====================================================
+   SEED (первоначальная загрузка данных)
+===================================================== */
+document.getElementById('seedBtn').addEventListener('click', () => {
+  if(!confirm('Загрузить начальный набор из 6 категорий и 9 товаров?')) return;
+
+  const seedCategories = [
+    { key: "headphones", label: "Наушники", order: 1 },
+    { key: "powerbank",  label: "Повербанки", order: 2 },
+    { key: "glasses",    label: "Очки", order: 3 },
+    { key: "gamepad",    label: "Геймпады", order: 4 },
+    { key: "watch",      label: "Часы", order: 5 },
+  ];
+
+  const seedProducts = [
+    { name: "AirPods 3", cat: "headphones", tag: "Наушники", price: "2000 ₽", order: 1, desc: "Компактные беспроводные наушники с пространственным звуком.", fullDesc: "Premium Поддержка беспроводной зарядки, чип J8. Отображаются в основных настройках, гравировки, картон+молочная коробка, анимация на iOS 26, звук микрофона. Чип с маркировкой 1562a airoha.", img: "images/airpods3-1.jpg", gallery: ["images/airpods3-1.jpg","images/airpods3-2.jpg","images/airpods3-3.jpg"], available: true },
+    { name: "AirPods 4", cat: "headphones", tag: "Наушники", price: "2200 ₽", order: 2, desc: "Новое поколение AirPods с улучшенным качеством звука.", fullDesc: "Чип J8, активное шумоподавление, улучшенная версия. Анимация, коробка и комплектация как в оригинале.", img: "images/airpods4-1.jpg", gallery: ["images/airpods4-1.jpg","images/airpods4-2.jpg","images/airpods4-3.jpg"], available: true },
+    { name: "AirPods Pro 2", cat: "headphones", tag: "Наушники", price: "2500 ₽", order: 3, desc: "Активное шумоподавление и адаптивный звук.", fullDesc: "Type-C, airoha 1563. Поддержка беспроводной зарядки, звук как на оригинале, самый качественный микрофон среди копий, гироскоп, пространственный звук.", img: "images/airpodspro2-1.jpg", gallery: ["images/airpodspro2-1.jpg","images/airpodspro2-2.jpg","images/airpodspro2-3.jpg"], available: true },
+    { name: "AirPods Pro 3", cat: "headphones", tag: "Наушники", price: "2800 ₽", order: 4, desc: "Флагманская модель с максимальным шумоподавлением.", fullDesc: "J8 Type-C с шумоподавлением. Флагманская модель линейки с максимальным уровнем шумоподавления и улучшенным качеством басов.", img: "images/airpodspro3-1.jpg", gallery: ["images/airpodspro3-1.jpg","images/airpodspro3-2.jpg","images/airpodspro3-3.jpg"], available: true },
+    { name: "Xiaomi Powerbank 10000 mAh", cat: "powerbank", tag: "Повербанк", price: "2000 ₽", order: 5, desc: "Компактный повербанк для ежедневной зарядки на ходу.", fullDesc: "Компактный повербанк ёмкостью 10000 мАч. Поддержка быстрой зарядки по двум портам одновременно, компактный корпус помещается в карман.", img: "images/XiaomiPowerbank10-1.jpg", gallery: ["images/XiaomiPowerbank10-1.jpg","images/XiaomiPowerbank10-2.jpg","images/XiaomiPowerbank10-3.jpg"], available: true },
+    { name: "Xiaomi Powerbank 20000 mAh", cat: "powerbank", tag: "Повербанк", price: "2500 ₽", order: 6, desc: "Повышенная ёмкость для нескольких полных зарядок.", fullDesc: "Повышенная ёмкость 20000 мАч. Три порта вывода позволяют заряжать сразу несколько устройств, LED-индикатор показывает уровень заряда.", img: "images/XiaomiPowerbank20-1.jpg", gallery: ["images/XiaomiPowerbank20-1.jpg","images/XiaomiPowerbank20-2.jpg","images/XiaomiPowerbank20-3.jpg"], available: true },
+    { name: "Ray-Ban Smart Glasses", cat: "glasses", tag: "Очки", price: "6000 ₽", order: 7, desc: "Стильные умные очки со встроенной камерой и звуком в оправе.", fullDesc: "Топовое качество съемки, отличный микрофон, двое линз в комплекте.", img: "images/raybansmart-1.jpg", gallery: ["images/raybansmart-1.jpg"], available: true },
+    { name: "PlayStation 5 DualSense", cat: "gamepad", tag: "Геймпад", price: "3500 ₽", order: 8, desc: "Беспроводной геймпад с адаптивными триггерами и тактильной отдачей.", fullDesc: "Точная эргономика, адаптивные триггеры с переменным сопротивлением, встроенный динамик и поддержка беспроводной зарядки — полный набор ощущений для комфортной игры.", img: "images/ps5dualsense-1.jpg", gallery: ["images/ps5dualsense-1.jpg"], available: true },
+    { name: "Apple Watch Series 11 46mm", cat: "watch", tag: "Часы", price: "3000 ₽", order: 9, desc: "Смарт-часы с большим экраном и трекингом активности на каждый день.", fullDesc: "Apple Watch Series 11 46mm Jet AI S8. Крупный корпус, чёткий дисплей и стабильная работа датчиков — привычный опыт Apple Watch без переплаты за оригинал.", img: "images/watch11-1.png", gallery: ["images/watch11-1.png"], available: true },
+  ];
+
+  const batch = db.batch();
+  seedCategories.forEach(c => {
+    const ref = db.collection('categories').doc(c.key);
+    batch.set(ref, { label: c.label, order: c.order });
+  });
+  seedProducts.forEach(p => {
+    const ref = db.collection('products').doc();
+    const { name, cat, tag, price, order, desc, fullDesc, img, gallery, available } = p;
+    batch.set(ref, { name, cat, tag, price, order, desc, fullDesc, img, gallery, available });
+  });
+
+  batch.commit()
+    .then(() => alert('Готово! Начальные данные загружены.'))
+    .catch(err => alert('Ошибка загрузки: ' + err.message));
+});
+</script>
+</body>
+</html>
