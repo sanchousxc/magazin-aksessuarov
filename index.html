@@ -59,12 +59,15 @@
     font-weight:700; font-size:20px; letter-spacing:1px;
   }
   .logo-mark{
-    width:34px; height:34px;
+    width:68px; height:68px;
     border:1.5px solid rgba(255,255,255,0.75);
     border-radius:50%;
     display:flex; align-items:center; justify-content:center;
-    font-size:14px; font-weight:800;
+    font-size:20px; font-weight:800;
+    color:#fff; text-decoration:none;
+    transition: background .2s ease, border-color .2s ease;
   }
+  .logo-mark:hover{ background:rgba(255,255,255,0.12); border-color:#fff; }
   .nav-links{
     position:absolute; left:50%; top:50%;
     transform:translate(-50%, -50%);
@@ -101,7 +104,22 @@
     text-align:center;
     padding:0 24px;
   }
+  .hero-badge{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:10px 22px 10px 14px;
+    margin:0 0 -45px 0;
+    transform: translateY(-61px) rotate(-2deg);
+    border:1.5px solid rgba(255,255,255,0.55);
+    border-radius:999px;
+    background:rgba(255,255,255,0.1);
+    font-size:15px; font-weight:700; letter-spacing:0.3px;
+    color:#fff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    white-space:nowrap;
+  }
+  .hero-badge svg{ flex:0 0 auto; }
   .hero-title{
+    position:relative;
     font-size:clamp(42px, 7vw, 106px);
     font-weight:800;
     letter-spacing:1px;
@@ -142,6 +160,48 @@
   }
   .scroll-hint .line{ width:1px; height:30px; background:rgba(255,255,255,0.5); animation:scrollpulse 1.8s ease-in-out infinite; }
   @keyframes scrollpulse{ 0%,100%{opacity:.3;} 50%{opacity:1;} }
+
+  /* ---------- FLOATING PRODUCT CLOUDS ---------- */
+  .float-layer{
+    position:absolute; inset:0;
+    z-index:3; pointer-events:none;
+    overflow:hidden;
+  }
+  .parallax-item{
+    position:absolute;
+    will-change:transform;
+    transition:transform .25s ease-out;
+  }
+  .float-item{
+    filter:drop-shadow(0 20px 25px rgba(0,0,0,0.35));
+    animation:productFloat 9s ease-in-out infinite;
+    will-change:transform;
+  }
+  .float-item img{ width:100%; height:auto; display:block; }
+
+  .parallax-item.gamepad  { left:calc(-8% + 2cm + 1cm);   top:calc(48% + 1.5cm - 0.5cm); width:35vw; --depth:38; }
+  .parallax-item.airpods  { left:calc(16% + 2cm);   top:calc(67% + 1.5cm + 1cm + 1cm); width:18vw; --depth:20; }
+  .parallax-item.vr       { left:calc(30% + 2cm);   top:calc(53% + 1.5cm + 1cm); width:33vw; --depth:30; }
+  .parallax-item.powerbank{ left:calc(55% + 2cm);   top:calc(44% + 1.5cm); width:27vw; --depth:34; }
+  .parallax-item.watch    { left:calc(76% + 2cm);   top:calc(41% + 1.5cm); width:19vw; --depth:16; }
+  .parallax-item.glasses  { left:calc(71% + 2cm);   top:calc(66% + 1.5cm); width:27vw; --depth:22; }
+
+  .float-item.gamepad   { animation-duration:10.4s; animation-delay:-1s; }
+  .float-item.airpods   { animation-duration:8.6s;  animation-delay:-4.8s; }
+  .float-item.vr        { animation-duration:9.9s;  animation-delay:-2.3s; }
+  .float-item.powerbank { animation-duration:10.9s; animation-delay:-6.1s; }
+  .float-item.watch     { animation-duration:9.1s;  animation-delay:-3.4s; }
+  .float-item.glasses   { animation-duration:10.1s; animation-delay:-0.5s; }
+
+  @keyframes productFloat{
+    0%   { transform: translateY(0px) rotate(0deg); }
+    50%  { transform: translateY(-16px) rotate(1deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+  }
+
+  @media (max-width: 900px){
+    .float-layer{ display:none; }
+  }
 
   /* ---------- CATALOG ---------- */
   .section{ padding:110px 151px; }
@@ -198,6 +258,7 @@
   .card-tag{ font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted-dark); }
   .card-title{ font-size:17px; font-weight:700; margin:0; }
   .card-desc{ font-size:13.5px; color:var(--muted-dark); line-height:1.5; margin:0 0 10px 0; flex:1; }
+  .card-price{ font-size:19px; font-weight:800; color:var(--ink); margin:0 0 12px 0; }
   .card-buy{
     display:flex; align-items:center; justify-content:center; gap:8px;
     border:1px solid var(--ink);
@@ -262,6 +323,7 @@
   .modal-info{ padding:32px; display:flex; flex-direction:column; gap:14px; min-width:0; }
   .modal-tag{ font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted-dark); }
   .modal-title{ font-size:24px; font-weight:700; margin:0; overflow-wrap:break-word; }
+  .modal-price{ font-size:21px; font-weight:800; color:var(--ink); margin:0; }
   .modal-desc{ font-size:14.5px; line-height:1.7; color:var(--muted-dark); margin:0; overflow-wrap:break-word; }
   .modal-buy{
     margin-top:auto;
@@ -370,7 +432,11 @@
 
   <nav class="nav">
     <div class="logo">
-      <span class="logo-mark">VS</span>
+      <a class="logo-mark" href="https://t.me/magazaks" target="_blank" rel="noopener" aria-label="Наш Telegram-канал">
+        <svg viewBox="0 0 240 240" width="60%" height="60%" xmlns="http://www.w3.org/2000/svg">
+          <path fill="currentColor" d="M76.3 137.4l-14.4-4.6c-9.6-3-9.7-9.6.4-13.6L166.5 76c8-3.2 15.7 2 12.7 14.2l-19.2 90.5c-1.6 7.6-6.2 9.4-12.6 5.9l-34.8-25.7-16.8 16.2c-1.9 1.9-3.4 3.4-6.9 3.4l2.4-35.5 64.6-58.4c2.8-2.5-.6-3.9-4.3-1.4l-79.9 50.2z"/>
+        </svg>
+      </a>
     </div>
     <div class="nav-links">
       <a href="#catalog">Каталог</a>
@@ -383,14 +449,29 @@
   </nav>
 
   <div class="hero-content">
-    <h1 class="hero-title">MAGAZIN AKSESSUAROV</h1>
+    <div class="hero-badge">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6.5 17.5C4.6 17.5 3 15.9 3 14c0-1.7 1.2-3.1 2.8-3.4C6.1 8.5 8 7 10.2 7c1.9 0 3.5 1.1 4.3 2.7.3-.1.6-.1.9-.1 1.9 0 3.6 1.5 3.6 3.4 0 1.9-1.5 3.5-3.4 3.5H6.5z" fill="#fff" fill-opacity="0.95"/>
+      </svg>
+      Новая коллекция уже в облаках
+    </div>
+    <h1 class="hero-title">Not Apple, Just Goat</h1>
     <p class="hero-sub">Подборка аксессуаров для повседневной жизни.<br>Заказ и оплата — прямо в Telegram.</p>
     <a class="hero-cta" href="#catalog">
-      <span class="circle"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4v13M7 12l5 5 5-5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Каталог
+      <span class="circle"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6v12M7 13l5 5 5-5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Каталог
     </a>
   </div>
 
   <div class="scroll-hint"><div class="line"></div></div>
+
+  <div class="float-layer">
+    <div class="parallax-item gamepad">   <div class="float-item gamepad">   <img src="images/gamepad.png" alt="Геймпад"></div></div>
+    <div class="parallax-item airpods">   <div class="float-item airpods">   <img src="images/airpods.png" alt="AirPods"></div></div>
+    <div class="parallax-item vr">        <div class="float-item vr">        <img src="images/vr.png" alt="VR-гарнитура"></div></div>
+    <div class="parallax-item powerbank"> <div class="float-item powerbank"> <img src="images/powerbank.png" alt="Power Bank"></div></div>
+    <div class="parallax-item watch">     <div class="float-item watch">     <img src="images/watch.png" alt="Часы"></div></div>
+    <div class="parallax-item glasses">   <div class="float-item glasses">   <img src="images/glasses.png" alt="Очки"></div></div>
+  </div>
 </header>
 
 <!-- ============ CATALOG ============ -->
@@ -404,6 +485,9 @@
       <button class="filter-btn active" data-filter="all">Все</button>
       <button class="filter-btn" data-filter="headphones">Наушники</button>
       <button class="filter-btn" data-filter="powerbank">Повербанки</button>
+      <button class="filter-btn" data-filter="glasses">Очки</button>
+      <button class="filter-btn" data-filter="gamepad">Геймпады</button>
+      <button class="filter-btn" data-filter="watch">Часы</button>
     </div>
   </div>
 
@@ -419,6 +503,7 @@
       <div class="modal-info">
         <span class="modal-tag" id="modalTag"></span>
         <h3 class="modal-title" id="modalTitle"></h3>
+        <div class="modal-price" id="modalPrice"></div>
         <p class="modal-desc" id="modalDesc"></p>
         <a class="modal-buy" id="modalBuy" target="_blank" rel="noopener">Купить в боте</a>
       </div>
@@ -591,15 +676,71 @@
 })();
 
 /* =====================================================
+   PRODUCT CLOUDS PARALLAX (hero)
+===================================================== */
+(function(){
+  const layer = document.querySelector('.hero .float-layer');
+  if(!layer) return;
+
+  const parallaxItems = Array.from(layer.querySelectorAll('.parallax-item')).map(el => ({
+    el,
+    depth: parseFloat(getComputedStyle(el).getPropertyValue('--depth')) || 20
+  }));
+
+  let targetX = 0, targetY = 0;
+  let currentX = 0, currentY = 0;
+  let hasMouse = false;
+
+  const heroEl = document.getElementById('top');
+  heroEl.addEventListener('mousemove', (e) => {
+    hasMouse = true;
+    const rect = heroEl.getBoundingClientRect();
+    targetX = ((e.clientX - rect.left) / rect.width) - 0.5;
+    targetY = ((e.clientY - rect.top) / rect.height) - 0.5;
+  });
+  heroEl.addEventListener('mouseleave', () => { hasMouse = false; });
+
+  function autoDrift(t){
+    return {
+      x: Math.sin(t * 0.15) * 0.12,
+      y: Math.cos(t * 0.12) * 0.08
+    };
+  }
+
+  const start = performance.now();
+  function tick(){
+    const t = (performance.now() - start) / 1000;
+    const drift = autoDrift(t);
+    const useX = hasMouse ? targetX : drift.x;
+    const useY = hasMouse ? targetY : drift.y;
+
+    currentX += (useX - currentX) * 0.06;
+    currentY += (useY - currentY) * 0.06;
+
+    parallaxItems.forEach(({ el, depth }) => {
+      const moveX = currentX * depth;
+      const moveY = currentY * depth;
+      el.style.transform = `translate(${moveX}px, ${moveY}px)`;
+    });
+
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+/* =====================================================
    CATALOG DATA + FILTER
 ===================================================== */
 const products = [
-  { name: "AirPods 3", cat: "headphones", tag: "Наушники", desc: "Компактные беспроводные наушники с пространственным звуком.", fullDesc: "Premium Поддержка беспроводной зарядки, чип J8 Отображаются в основны, пробиваются, 3iтеi+гравировки, картон+молочная коробка, анимация на ios 26, все изображения в настройках как на AIR 3, звук микрофона. чип с маркировкой 1562a airoha.", img: "images/airpods3-1.jpg", gallery: ["images/airpods3-1.jpg", "images/airpods3-2.jpg", "images/airpods3-3.jpg"] },
-  { name: "AirPods 4", cat: "headphones", tag: "Наушники", desc: "Новое поколение AirPods с улучшенным качеством звука.", fullDesc: "чип J8 активное шумоподавление, улучшенная версия. Анимация, коробка и комплектация как в оригинале.", img: "images/airpods4-1.jpg", gallery: ["images/airpods4-1.jpg", "images/airpods4-2.jpg", "images/airpods4-3.jpg"] },
-  { name: "AirPods Pro 2", cat: "headphones", tag: "Наушники", desc: "Активное шумоподавление и адаптивный звук.", fullDesc: "Type-C airoha 1563 Е. Поддержка беспроводной зарядки, Звук как на оригинале, самый качественный микрофон среди копий, гироскоп, пространственный звук, Функции сенсоров как на ориге 1 в 1, 350ма аккумулятор до 7 часов работы, максимальное качество пластика кейса, все гравировки.", img: "images/airpodspro2-1.jpg", gallery: ["images/airpodspro2-1.jpg", "images/airpodspro2-2.jpg", "images/airpodspro2-3.jpg"] },
-  { name: "AirPods Pro 3", cat: "headphones", tag: "Наушники", desc: "Флагманская модель с максимальным шумоподавлением.", fullDesc: "J8 Type-C c шумоподавлением. Флагманская модель линейки с максимальным уровнем шумоподавления и улучшенным качеством басов.", img: "images/airpodspro3-1.jpg", gallery: ["images/airpodspro3-1.jpg", "images/airpodspro3-2.jpg", "images/airpodspro3-3.jpg"] },
-  { name: "Xiaomi Powerbank 10000 mAh", cat: "powerbank", tag: "Повербанк", desc: "Компактный повербанк для ежедневной зарядки на ходу.", fullDesc: "Компактный повербанк ёмкостью 10000 мАч для ежедневной зарядки на ходу. Поддержка быстрой зарядки по двум портам одновременно, компактный корпус помещается в карман.", img: "images/XiaomiPowerbank10-1.jpg", gallery: ["images/XiaomiPowerbank10-1.jpg", "images/XiaomiPowerbank10-2.jpg", "images/XiaomiPowerbank10-3.jpg"] },
-  { name: "Xiaomi Powerbank 20000 mAh", cat: "powerbank", tag: "Повербанк", desc: "Повышенная ёмкость для нескольких полных зарядок.", fullDesc: "Повышенная ёмкость 20000 мАч хватит на несколько полных зарядок смартфона. Три порта вывода позволяют заряжать сразу несколько устройств, а LED-индикатор показывает уровень заряда.", img: "images/XiaomiPowerbank20-1.jpg", gallery: ["images/XiaomiPowerbank20-1.jpg", "images/XiaomiPowerbank20-2.jpg", "images/XiaomiPowerbank20-3.jpg"] },
+  { name: "AirPods 3", cat: "headphones", tag: "Наушники", price: "2000 ₽", desc: "Компактные беспроводные наушники с пространственным звуком.", fullDesc: "Premium Поддержка беспроводной зарядки, чип J8 Отображаются в основны, пробиваются, 3iтеi+гравировки, картон+молочная коробка, анимация на ios 26, все изображения в настройках как на AIR 3, звук микрофона. чип с маркировкой 1562a airoha.", img: "images/airpods3-1.jpg", gallery: ["images/airpods3-1.jpg", "images/airpods3-2.jpg", "images/airpods3-3.jpg"] },
+  { name: "AirPods 4", cat: "headphones", tag: "Наушники", price: "2200 ₽", desc: "Новое поколение AirPods с улучшенным качеством звука.", fullDesc: "чип J8 активное шумоподавление, улучшенная версия. Анимация, коробка и комплектация как в оригинале.", img: "images/airpods4-1.jpg", gallery: ["images/airpods4-1.jpg", "images/airpods4-2.jpg", "images/airpods4-3.jpg"] },
+  { name: "AirPods Pro 2", cat: "headphones", tag: "Наушники", price: "2500 ₽", desc: "Активное шумоподавление и адаптивный звук.", fullDesc: "Type-C airoha 1563 Е. Поддержка беспроводной зарядки, Звук как на оригинале, самый качественный микрофон среди копий, гироскоп, пространственный звук, Функции сенсоров как на ориге 1 в 1, 350ма аккумулятор до 7 часов работы, максимальное качество пластика кейса, все гравировки.", img: "images/airpodspro2-1.jpg", gallery: ["images/airpodspro2-1.jpg", "images/airpodspro2-2.jpg", "images/airpodspro2-3.jpg"] },
+  { name: "AirPods Pro 3", cat: "headphones", tag: "Наушники", price: "2800 ₽", desc: "Флагманская модель с максимальным шумоподавлением.", fullDesc: "J8 Type-C c шумоподавлением. Флагманская модель линейки с максимальным уровнем шумоподавления и улучшенным качеством басов.", img: "images/airpodspro3-1.jpg", gallery: ["images/airpodspro3-1.jpg", "images/airpodspro3-2.jpg", "images/airpodspro3-3.jpg"] },
+  { name: "Xiaomi Powerbank 10000 mAh", cat: "powerbank", tag: "Повербанк", price: "2000 ₽", desc: "Компактный повербанк для ежедневной зарядки на ходу.", fullDesc: "Компактный повербанк ёмкостью 10000 мАч для ежедневной зарядки на ходу. Поддержка быстрой зарядки по двум портам одновременно, компактный корпус помещается в карман.", img: "images/XiaomiPowerbank10-1.jpg", gallery: ["images/XiaomiPowerbank10-1.jpg", "images/XiaomiPowerbank10-2.jpg", "images/XiaomiPowerbank10-3.jpg"] },
+  { name: "Xiaomi Powerbank 20000 mAh", cat: "powerbank", tag: "Повербанк", price: "2500 ₽", desc: "Повышенная ёмкость для нескольких полных зарядок.", fullDesc: "Повышенная ёмкость 20000 мАч хватит на несколько полных зарядок смартфона. Три порта вывода позволяют заряжать сразу несколько устройств, а LED-индикатор показывает уровень заряда.", img: "images/XiaomiPowerbank20-1.jpg", gallery: ["images/XiaomiPowerbank20-1.jpg", "images/XiaomiPowerbank20-2.jpg", "images/XiaomiPowerbank20-3.jpg"] },
+  { name: "Ray-Ban Smart Glasses", cat: "glasses", tag: "Очки", price: "6000 ₽", desc: "Стильные умные очки со встроенной камерой и звуком в оправе.", fullDesc: "Топовое качество съемки, отличный микрофон, двое линз в комплекте.", img: "images/raybansmart-1.jpg", gallery: ["images/raybansmart-1.jpg"] },
+  { name: "PlayStation 5 DualSense", cat: "gamepad", tag: "Геймпад", price: "3500 ₽", desc: "Беспроводной геймпад с адаптивными триггерами и тактильной отдачей.", fullDesc: "Точная эргономика, адаптивные триггеры с переменным сопротивлением, встроенный динамик и поддержка беспроводной зарядки — полный набор ощущений для комфортной игры.", img: "images/ps5dualsense-1.jpg", gallery: ["images/ps5dualsense-1.jpg"] },
+  { name: "Apple Watch Series 11 46mm", cat: "watch", tag: "Часы", price: "3000 ₽", desc: "Смарт-часы с большим экраном и трекингом активности на каждый день.", fullDesc: "Apple Watch Series 11 46mm Jet AI S8. Крупный корпус, чёткий дисплей и стабильная работа датчиков — привычный опыт Apple Watch без переплаты за оригинал.", img: "images/watch11-1.png", gallery: ["images/watch11-1.png"] },
 ];
 
 const grid = document.getElementById('grid');
@@ -621,6 +762,7 @@ function render(filter){
           <span class="card-tag">${p.tag}</span>
           <h3 class="card-title">${p.name}</h3>
           <p class="card-desc">${p.desc}</p>
+          <div class="card-price">${p.price}</div>
           <a class="card-buy" href="${BOT_LINK}" target="_blank" rel="noopener">Купить</a>
         </div>
       `;
@@ -649,6 +791,7 @@ const modalMainImg = document.getElementById('modalMainImg');
 const modalThumbs  = document.getElementById('modalThumbs');
 const modalTag     = document.getElementById('modalTag');
 const modalTitle   = document.getElementById('modalTitle');
+const modalPrice   = document.getElementById('modalPrice');
 const modalDesc    = document.getElementById('modalDesc');
 const modalBuy     = document.getElementById('modalBuy');
 
@@ -663,6 +806,7 @@ function openModal(p){
   const gallery = (p.gallery && p.gallery.length) ? p.gallery : (p.img ? [p.img] : []);
   modalTag.textContent = p.tag;
   modalTitle.textContent = p.name;
+  modalPrice.textContent = p.price || '';
   modalDesc.textContent = p.fullDesc || p.desc;
   modalBuy.href = BOT_LINK;
 
