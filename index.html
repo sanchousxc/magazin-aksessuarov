@@ -769,7 +769,7 @@ const BOT_LINK = "https://t.me/magazil_aksessuarovbot";
 
 function renderFilters(){
   const extra = categories.map(c =>
-    `<button class="filter-btn${currentFilter===c.key ? ' active':''}" data-filter="${c.key}">${c.label}</button>`
+    `<button class="filter-btn${currentFilter===c.id ? ' active':''}" data-filter="${c.id}">${c.label}</button>`
   ).join('');
   filtersEl.innerHTML = `<button class="filter-btn${currentFilter==='all' ? ' active':''}" data-filter="all">Все</button>${extra}`;
 }
